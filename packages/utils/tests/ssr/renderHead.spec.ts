@@ -1,8 +1,8 @@
 import type { HeadConfig } from '@vuepress/shared'
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { renderHead } from '../../src/index.js'
 
-const testCases: [HeadConfig, string][] = [
+const TEST_CASES: [HeadConfig, string][] = [
   [['title', {}, 'vuepress site title'], `<title>vuepress site title</title>`],
   [
     [
@@ -70,12 +70,8 @@ const testCases: [HeadConfig, string][] = [
   ],
 ]
 
-describe('utils > renderHead', () => {
-  describe('should render head config correctly', () => {
-    testCases.forEach(([source, expected]) => {
-      it(expected, () => {
-        expect(renderHead(source)).toBe(expected)
-      })
-    })
+TEST_CASES.forEach(([source, expected]) => {
+  it(expected, () => {
+    expect(renderHead(source)).toBe(expected)
   })
 })

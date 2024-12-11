@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module'
-import type Config from 'webpack-chain'
+import type Config from 'webpack-5-chain'
 import type { WebpackBundlerOptions } from '../types.js'
 import { resolveEsbuildJsxOptions } from './resolveEsbuildJsxOptions.js'
 
@@ -45,7 +45,7 @@ export const handleModuleJs = ({
         return false
       }
       // don't transpile node_modules
-      return /node_modules/.test(filePath)
+      return filePath.includes('node_modules')
     })
     .end()
     // use esbuild-loader

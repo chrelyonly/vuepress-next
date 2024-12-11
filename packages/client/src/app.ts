@@ -1,8 +1,8 @@
 import { clientConfigs } from '@internal/clientConfigs'
 import { createApp, createSSRApp, h } from 'vue'
-import { RouterView } from 'vue-router'
-import { siteData } from './composables/index.js'
-import { createVueRouter } from './router.js'
+import { usePageLayout } from './composables/index.js'
+import { siteData } from './internal/siteData.js'
+import { createVueRouter } from './router/createVueRouter.js'
 import { setupGlobalComponents } from './setupGlobalComponents.js'
 import { setupGlobalComputed } from './setupGlobalComputed.js'
 import { setupUpdateHead } from './setupUpdateHead.js'
@@ -17,7 +17,7 @@ const appCreator = __VUEPRESS_DEV__ ? createApp : createSSRApp
 export const createVueApp: CreateVueAppFunction = async () => {
   // create vue app
   const app = appCreator({
-    name: 'VuepressApp',
+    name: 'Vuepress',
 
     setup() {
       // auto update head
@@ -28,12 +28,17 @@ export const createVueApp: CreateVueAppFunction = async () => {
         clientConfig.setup?.()
       }
 
-      return () => [
-        h(RouterView),
-        ...clientConfigs.flatMap(({ rootComponents = [] }) =>
+      // get all root components
+      const clientRootComponents = clientConfigs.flatMap(
+        ({ rootComponents = [] }) =>
           rootComponents.map((component) => h(component)),
-        ),
-      ]
+      )
+
+      // get page layout
+      const pageLayout = usePageLayout()
+
+      // render layout and root components
+      return () => [h(pageLayout.value), clientRootComponents]
     },
   })
 
@@ -70,8 +75,8 @@ export const createVueApp: CreateVueAppFunction = async () => {
 
 // mount app in client bundle
 if (!__VUEPRESS_SSR__) {
-  createVueApp().then(({ app, router }) => {
-    router.isReady().then(() => {
+  void createVueApp().then(({ app, router }) => {
+    void router.isReady().then(() => {
       app.mount('#app')
     })
   })

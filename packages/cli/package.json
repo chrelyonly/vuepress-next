@@ -1,6 +1,6 @@
 {
   "name": "@vuepress/cli",
-  "version": "2.0.0-beta.67",
+  "version": "2.0.0-rc.19",
   "description": "CLI package of VuePress",
   "keywords": [
     "vuepress",
@@ -8,11 +8,11 @@
   ],
   "homepage": "https://github.com/vuepress",
   "bugs": {
-    "url": "https://github.com/vuepress/vuepress-next/issues"
+    "url": "https://github.com/vuepress/core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuepress/vuepress-next.git"
+    "url": "git+https://github.com/vuepress/core.git"
   },
   "license": "MIT",
   "author": "meteorlxy",
@@ -40,12 +40,12 @@
     "@vuepress/shared": "workspace:*",
     "@vuepress/utils": "workspace:*",
     "cac": "^6.7.14",
-    "chokidar": "^3.5.3",
-    "envinfo": "^7.10.0",
-    "esbuild": "~0.18.20"
+    "chokidar": "^3.6.0",
+    "envinfo": "^7.14.0",
+    "esbuild": "~0.21.5"
   },
   "devDependencies": {
-    "@types/envinfo": "^7.8.1"
+    "@types/envinfo": "^7.8.4"
   },
   "publishConfig": {
     "access": "public"
@@ -62,6 +62,6 @@
     "outDir": "./dist",
     "sourcemap": false,
     "target": "es2022",
-    "tsconfig": "../tsconfig.dts.json"
+    "tsconfig": "../../tsconfig.dts.json"
   }
 }

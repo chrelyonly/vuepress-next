@@ -1,9 +1,21 @@
 import { slugify as defaultSlugify } from '@mdit-vue/shared'
+import { logger } from '@vuepress/utils'
 import MarkdownIt from 'markdown-it'
+import type {
+  AnchorPluginOptions,
+  AssetsPluginOptions,
+  EmojiPluginOptions,
+  FrontmatterPluginOptions,
+  HeadersPluginOptions,
+  ImportCodePluginOptions,
+  LinksPluginOptions,
+  SfcPluginOptions,
+  TocPluginOptions,
+  VPrePluginOptions,
+} from './plugins.js'
 import {
   anchorPlugin,
   assetsPlugin,
-  codePlugin,
   componentPlugin,
   emojiPlugin,
   frontmatterPlugin,
@@ -13,18 +25,7 @@ import {
   sfcPlugin,
   titlePlugin,
   tocPlugin,
-} from './plugins.js'
-import type {
-  AnchorPluginOptions,
-  AssetsPluginOptions,
-  CodePluginOptions,
-  EmojiPluginOptions,
-  FrontmatterPluginOptions,
-  HeadersPluginOptions,
-  ImportCodePluginOptions,
-  LinksPluginOptions,
-  SfcPluginOptions,
-  TocPluginOptions,
+  vPrePlugin,
 } from './plugins.js'
 import type { Markdown, MarkdownOptions } from './types.js'
 
@@ -34,7 +35,9 @@ import type { Markdown, MarkdownOptions } from './types.js'
 export const createMarkdown = ({
   anchor,
   assets,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   code,
+  vPre,
   component,
   emoji,
   frontmatter,
@@ -63,11 +66,10 @@ export const createMarkdown = ({
     md.use<AnchorPluginOptions>(anchorPlugin, {
       level: [1, 2, 3, 4, 5, 6],
       slugify,
-      permalink: anchorPlugin.permalink.ariaHidden({
+      permalink: anchorPlugin.permalink.headerLink({
         class: 'header-anchor',
-        symbol: '#',
-        space: true,
-        placement: 'before',
+        // Add a span inside the link so Safari shows headings in reader view.
+        safariReaderFix: true,
       }),
       ...anchor,
     })
@@ -82,9 +84,11 @@ export const createMarkdown = ({
     md.use<AssetsPluginOptions>(assetsPlugin, assets)
   }
 
-  // process code fence
-  if (code !== false) {
-    md.use<CodePluginOptions>(codePlugin, code)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- deprecation warning
+  if (code) {
+    logger.warn(
+      `\`markdown.code\` option has been removed, please use '@vuepress/plugin-shiki' or '@vuepress/plugin-prismjs' instead.\n See https://vuepress.vuejs.org/reference/config.html#markdown-code`,
+    )
   }
 
   // treat unknown html tags as components
@@ -145,6 +149,11 @@ export const createMarkdown = ({
   // extract title into env
   if (title !== false) {
     md.use(titlePlugin)
+  }
+
+  // add v-pre to `<pre>` and `<code>`
+  if (vPre !== false) {
+    md.use<VPrePluginOptions>(vPrePlugin, vPre)
   }
 
   return md

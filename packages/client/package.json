@@ -1,6 +1,6 @@
 {
   "name": "@vuepress/client",
-  "version": "2.0.0-beta.67",
+  "version": "2.0.0-rc.19",
   "description": "Client package of VuePress",
   "keywords": [
     "vuepress",
@@ -8,11 +8,11 @@
   ],
   "homepage": "https://github.com/vuepress",
   "bugs": {
-    "url": "https://github.com/vuepress/vuepress-next/issues"
+    "url": "https://github.com/vuepress/core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuepress/vuepress-next.git"
+    "url": "git+https://github.com/vuepress/core.git"
   },
   "license": "MIT",
   "author": "meteorlxy",
@@ -37,28 +37,27 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@vue/devtools-api": "^6.5.1",
+    "@vue/devtools-api": "^7.6.7",
     "@vuepress/shared": "workspace:*",
-    "@vueuse/core": "^10.5.0",
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.5"
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "tsup": {
     "clean": true,
-    "dts": "./src/index.ts",
+    "dts": [
+      "./src/app.ts",
+      "./src/index.ts"
+    ],
     "entry": [
       "./src/app.ts",
       "./src/index.ts"
     ],
     "external": [
       "@internal/clientConfigs",
-      "@internal/layoutComponents",
-      "@internal/pagesComponents",
-      "@internal/pagesData",
-      "@internal/pagesRoutes",
+      "@internal/routes",
       "@internal/siteData"
     ],
     "format": [

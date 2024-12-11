@@ -1,59 +1,24 @@
-import { computedEager, computedWithControl } from '@vueuse/core'
 import type { App } from 'vue'
-import { computed } from 'vue'
+import { computed, customRef } from 'vue'
 import type { Router } from 'vue-router'
-import type {
-  LayoutsRef,
-  PageData,
-  PageDataRef,
-  PageFrontmatter,
-  PageFrontmatterRef,
-  PageHead,
-  PageHeadRef,
-  PageHeadTitle,
-  PageHeadTitleRef,
-  PageLang,
-  PageLangRef,
-  PageLayoutRef,
-  RouteLocale,
-  RouteLocaleRef,
-  SiteData,
-  SiteDataRef,
-  SiteLocaleData,
-  SiteLocaleDataRef,
-} from './composables/index.js'
-import {
-  layoutsSymbol,
-  pageDataSymbol,
-  pageFrontmatterSymbol,
-  pageHeadSymbol,
-  pageHeadTitleSymbol,
-  pageLangSymbol,
-  pageLayoutSymbol,
-  pagesData,
-  routeLocaleSymbol,
-  siteData,
-  siteLocaleDataSymbol,
-} from './composables/index.js'
-import { withBase } from './helpers/index.js'
+import { clientDataSymbol } from './composables/index.js'
+import { redirects, routes } from './internal/routes.js'
+import { siteData } from './internal/siteData.js'
 import { resolvers } from './resolvers.js'
-import type { ClientConfig } from './types/index.js'
-
-/**
- * Vuepress client global computed
- */
-export interface GlobalComputed {
-  layouts: LayoutsRef
-  pageData: PageDataRef
-  pageFrontmatter: PageFrontmatterRef
-  pageHead: PageHeadRef
-  pageHeadTitle: PageHeadTitleRef
-  pageLang: PageLangRef
-  pageLayout: PageLayoutRef
-  routeLocale: RouteLocaleRef
-  siteData: SiteDataRef
-  siteLocaleData: SiteLocaleDataRef
-}
+import type {
+  ClientConfig,
+  ClientData,
+  PageChunk,
+  PageData,
+  PageFrontmatter,
+  PageHead,
+  PageHeadTitle,
+  PageLang,
+  RouteLocale,
+  SiteData,
+  SiteLocaleData,
+} from './types/index.js'
+import { withBase } from './utils/index.js'
 
 /**
  * Create and provide global computed
@@ -62,38 +27,49 @@ export const setupGlobalComputed = (
   app: App,
   router: Router,
   clientConfigs: ClientConfig[],
-): GlobalComputed => {
-  // create eager computed for route path and locale, so that route changes
-  // won't make all downstream computed re-evaluate
-  const routePath = computedEager(() => router.currentRoute.value.path)
-  const routeLocale = computedEager(() =>
-    resolvers.resolveRouteLocale(siteData.value.locales, routePath.value),
-  )
+): ClientData => {
+  // route path of current page
+  const routePath = computed(() => router.currentRoute.value.path)
 
-  // load page data from route meta
-  const pageData = computedWithControl(
-    routePath,
-    () => router.currentRoute.value.meta._data!,
-  )
+  // load page chunk from route meta
+  const pageChunk = customRef<PageChunk>((track, trigger) => ({
+    get() {
+      track()
+      return router.currentRoute.value.meta._pageChunk!
+    },
+    set(value) {
+      router.currentRoute.value.meta._pageChunk = value
+      trigger()
+    },
+  }))
+
   // handle page data HMR
   if (__VUEPRESS_DEV__ && (import.meta.webpackHot || import.meta.hot)) {
-    __VUE_HMR_RUNTIME__.updatePageData = (data: PageData) => {
-      pagesData.value[data.key] = () => Promise.resolve(data)
-      if (data.key === router.currentRoute.value.meta._data?.key) {
-        router.currentRoute.value.meta._data = data
-        pageData.trigger()
+    __VUE_HMR_RUNTIME__.updatePageData = async (newPageData: PageData) => {
+      const oldPageChunk = await routes.value[newPageData.path].loader()
+      const newPageChunk = { comp: oldPageChunk.comp, data: newPageData }
+      routes.value[newPageData.path].loader = async () =>
+        Promise.resolve(newPageChunk)
+      if (
+        newPageData.path ===
+        router.currentRoute.value.meta._pageChunk?.data.path
+      ) {
+        pageChunk.value = newPageChunk
       }
     }
   }
 
   // create other global computed
   const layouts = computed(() => resolvers.resolveLayouts(clientConfigs))
+  const routeLocale = computed(() =>
+    resolvers.resolveRouteLocale(siteData.value.locales, routePath.value),
+  )
   const siteLocaleData = computed(() =>
     resolvers.resolveSiteLocaleData(siteData.value, routeLocale.value),
   )
-  const pageFrontmatter = computed(() =>
-    resolvers.resolvePageFrontmatter(pageData.value),
-  )
+  const pageComponent = computed(() => pageChunk.value.comp)
+  const pageData = computed(() => pageChunk.value.data)
+  const pageFrontmatter = computed(() => pageData.value.frontmatter)
   const pageHeadTitle = computed(() =>
     resolvers.resolvePageHeadTitle(pageData.value, siteLocaleData.value),
   )
@@ -111,16 +87,24 @@ export const setupGlobalComputed = (
     resolvers.resolvePageLayout(pageData.value, layouts.value),
   )
 
-  // provide global computed
-  app.provide(layoutsSymbol, layouts)
-  app.provide(pageDataSymbol, pageData)
-  app.provide(pageFrontmatterSymbol, pageFrontmatter)
-  app.provide(pageHeadTitleSymbol, pageHeadTitle)
-  app.provide(pageHeadSymbol, pageHead)
-  app.provide(pageLangSymbol, pageLang)
-  app.provide(pageLayoutSymbol, pageLayout)
-  app.provide(routeLocaleSymbol, routeLocale)
-  app.provide(siteLocaleDataSymbol, siteLocaleData)
+  // provide global computed in clientData
+  const clientData: ClientData = {
+    layouts,
+    pageData,
+    pageComponent,
+    pageFrontmatter,
+    pageHead,
+    pageHeadTitle,
+    pageLang,
+    pageLayout,
+    redirects,
+    routeLocale,
+    routePath,
+    routes,
+    siteData,
+    siteLocaleData,
+  }
+  app.provide(clientDataSymbol, clientData)
 
   // provide global helpers
   Object.defineProperties(app.config.globalProperties, {
@@ -135,18 +119,7 @@ export const setupGlobalComputed = (
     $withBase: { get: () => withBase },
   })
 
-  return {
-    layouts,
-    pageData,
-    pageFrontmatter,
-    pageHead,
-    pageHeadTitle,
-    pageLang,
-    pageLayout,
-    routeLocale,
-    siteData,
-    siteLocaleData,
-  }
+  return clientData
 }
 
 declare module 'vue' {

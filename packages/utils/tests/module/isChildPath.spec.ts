@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { isChildPath } from '../../src/index.js'
 
-const testCases: [[string, string], boolean][] = [
+const TEST_CASES: [[string, string], boolean][] = [
   [['/foo', '/foo'], true],
   [['/foo', '/bar'], false],
   [['/foo', '/foo/bar'], false],
@@ -22,12 +22,8 @@ const testCases: [[string, string], boolean][] = [
   [['foo-bar', 'foo'], false],
 ]
 
-describe('utils > isChildPath', () => {
-  describe('should check child path correctly', () => {
-    testCases.forEach(([source, expected]) => {
-      it(JSON.stringify(source), () => {
-        expect(isChildPath(...source)).toBe(expected)
-      })
-    })
+TEST_CASES.forEach(([source, expected]) => {
+  it(`${JSON.stringify(source)} -> ${expected}`, () => {
+    expect(isChildPath(...source)).toBe(expected)
   })
 })

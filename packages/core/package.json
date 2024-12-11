@@ -1,6 +1,6 @@
 {
   "name": "@vuepress/core",
-  "version": "2.0.0-beta.67",
+  "version": "2.0.0-rc.19",
   "description": "Core package of VuePress",
   "keywords": [
     "vuepress",
@@ -8,11 +8,11 @@
   ],
   "homepage": "https://github.com/vuepress",
   "bugs": {
-    "url": "https://github.com/vuepress/vuepress-next/issues"
+    "url": "https://github.com/vuepress/core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuepress/vuepress-next.git"
+    "url": "git+https://github.com/vuepress/core.git"
   },
   "license": "MIT",
   "author": "meteorlxy",
@@ -35,7 +35,7 @@
     "@vuepress/markdown": "workspace:*",
     "@vuepress/shared": "workspace:*",
     "@vuepress/utils": "workspace:*",
-    "vue": "^3.3.4"
+    "vue": "^3.5.13"
   },
   "publishConfig": {
     "access": "public"
@@ -52,6 +52,6 @@
     "outDir": "./dist",
     "sourcemap": false,
     "target": "es2022",
-    "tsconfig": "../tsconfig.dts.json"
+    "tsconfig": "../../tsconfig.dts.json"
   }
 }

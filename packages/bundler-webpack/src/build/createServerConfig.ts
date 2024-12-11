@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import type { App } from '@vuepress/core'
-import type Config from 'webpack-chain'
+import type Config from 'webpack-5-chain'
 import { createBaseConfig } from '../config/index.js'
 import type { WebpackBundlerOptions } from '../types.js'
 
@@ -43,13 +43,16 @@ export const createServerConfig = async (
   // do not need to minimize server bundle
   config.optimization.minimize(false)
 
-  // use internal vuepress-loader to handle SSR dependencies
+  // use internal vuepress-ssr-loader to handle SSR dependencies
   config.module
     .rule('vue')
     .test(/\.vue$/)
-    .use('vuepress-loader')
+    .use('vuepress-ssr-loader')
     .before('vue-loader')
-    .loader(require.resolve('#vuepress-loader'))
+    .loader(require.resolve('#vuepress-ssr-loader'))
+    .options({
+      app,
+    })
     .end()
 
   return config

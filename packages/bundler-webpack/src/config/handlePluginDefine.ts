@@ -1,6 +1,6 @@
 import type { App } from '@vuepress/core'
 import webpack from 'webpack'
-import type Config from 'webpack-chain'
+import type Config from 'webpack-5-chain'
 
 /**
  * Set webpack DefinePlugin
@@ -27,6 +27,7 @@ export const handlePluginDefine = async ({
       // enable options API by default
       __VUE_OPTIONS_API__: JSON.stringify(true),
       __VUE_PROD_DEVTOOLS__: JSON.stringify(app.env.isDebug),
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(app.env.isDebug),
     },
   ])
 
@@ -35,12 +36,14 @@ export const handlePluginDefine = async ({
 
   // tap the arguments of DefinePlugin
   config.plugin('define').tap(([options]) => {
-    defineResult.forEach((defineObject) =>
+    defineResult.forEach((defineObject) => {
       Object.entries(defineObject).forEach(([key, value]) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         options[key] = JSON.stringify(value)
-      }),
-    )
+      })
+    })
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return [options]
   })
 }

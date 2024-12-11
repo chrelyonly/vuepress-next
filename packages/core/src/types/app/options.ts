@@ -9,18 +9,98 @@ import type { Theme } from '../theme.js'
  * Vuepress app common config that shared between dev and build
  */
 export interface AppConfigCommon extends Partial<SiteData> {
+  /**
+   * Source directory of the markdown files.
+   *
+   * Vuepress will load markdown files from this directory.
+   *
+   * @required
+   */
   source: string
+
+  /**
+   * Destination directory of the output files.
+   *
+   * Vuepress will output the static site files to this directory.
+   *
+   * @default `${source}/.vuepress/dist`
+   */
   dest?: string
+
+  /**
+   * Temp files directory.
+   *
+   * Vuepress will write temp files to this directory.
+   *
+   * @default `${source}/.vuepress/.temp`
+   */
   temp?: string
+
+  /**
+   * Cache files directory.
+   *
+   * Vuepress will write cache files to this directory.
+   *
+   * @default `${source}/.vuepress/.cache`
+   */
   cache?: string
+
+  /**
+   * Public files directory.
+   *
+   * Vuepress will copy the files from public directory to the output directory.
+   *
+   * @default `${source}/.vuepress/public`
+   */
   public?: string
 
+  /**
+   * Whether to enable debug mode
+   *
+   * @default false
+   */
   debug?: boolean
+
+  /**
+   * Markdown options
+   *
+   * @default {}
+   */
   markdown?: MarkdownOptions
+
+  /**
+   * Patterns to match the markdown files as pages
+   *
+   * @default ['**\/*.md', '!.vuepress', '!node_modules']
+   */
   pagePatterns?: string[]
+
+  /**
+   * Pattern to generate permalink for pages
+   *
+   * @default null
+   */
   permalinkPattern?: string | null
+
+  /**
+   * Vuepress bundler
+   *
+   * @required
+   */
   bundler: Bundler
+
+  /**
+   * Vuepress theme
+   *
+   * @required
+   */
   theme: Theme
+
+  /**
+   * Vuepress plugins
+   *
+   * @default []
+   */
   plugins?: PluginConfig
 }
 
@@ -67,7 +147,7 @@ export interface AppConfigBuild {
    *
    * @default true
    */
-  shouldPreload?: ((file: string, type: string) => boolean) | boolean
+  shouldPreload?: boolean | ((file: string, type: string) => boolean)
 
   /**
    * Determine what resource files should be prefetched. Use boolean value to
@@ -75,7 +155,7 @@ export interface AppConfigBuild {
    *
    * @default true
    */
-  shouldPrefetch?: ((file: string, type: string) => boolean) | boolean
+  shouldPrefetch?: boolean | ((file: string, type: string) => boolean)
 
   /**
    * Specify the path of the HTML template to be used for build
@@ -87,17 +167,21 @@ export interface AppConfigBuild {
   /**
    * Specify the HTML template renderer to be used for build
    *
-   * @default templateRenderer from '@vuepress/utils'
+   * @default `import { templateRenderer } from '@vuepress/utils'`
    */
   templateBuildRenderer?: TemplateRenderer
 }
 
 /**
- * Vuepress app config
+ * Vuepress app user config.
+ *
+ * It would be provided by user, typically via a config file.
  */
-export type AppConfig = AppConfigCommon & AppConfigDev & AppConfigBuild
+export type AppConfig = AppConfigBuild & AppConfigCommon & AppConfigDev
 
 /**
- * Vuepress app options
+ * Vuepress app options that resolved from user config.
+ *
+ * It fills all optional fields with a default value.
  */
 export type AppOptions = Required<AppConfig>

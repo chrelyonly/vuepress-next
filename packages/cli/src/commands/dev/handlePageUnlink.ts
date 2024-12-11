@@ -1,9 +1,5 @@
-import {
-  preparePagesComponents,
-  preparePagesData,
-  preparePagesRoutes,
-} from '@vuepress/core'
 import type { App, Page } from '@vuepress/core'
+import { prepareRoutes } from '@vuepress/core'
 
 /**
  * Event handler for page unlink event
@@ -25,10 +21,8 @@ export const handlePageUnlink = async (
   // remove the old page
   app.pages.splice(pageIndex, 1)
 
-  // re-prepare page files
-  await preparePagesComponents(app)
-  await preparePagesData(app)
-  await preparePagesRoutes(app)
+  // re-prepare routes file
+  await prepareRoutes(app)
 
   return page
 }

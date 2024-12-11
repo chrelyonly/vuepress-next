@@ -1,6 +1,5 @@
 import { resolveFileMeta } from './resolveFileMeta.js'
-import type { ClientManifest } from './ssr/index.js'
-import type { FileMeta, ModuleFilesMetaMap } from './types.js'
+import type { ClientManifest, FileMeta, ModuleFilesMetaMap } from './types.js'
 
 /**
  * Resolve files meta from clientManifest
@@ -27,17 +26,15 @@ export const resolveClientManifestMeta = ({
 
   // module to files meta map
   const moduleFilesMetaMap = Object.fromEntries(
-    Object.entries(modules).map(([moduleRequest, assetFilesIndex]) => {
-      return [
-        moduleRequest,
-        assetFilesIndex
-          .map((fileIndex) => allFilesMeta[fileIndex])
-          .filter(
-            ({ file, type }) =>
-              async.includes(file) || (type !== 'style' && type !== 'script'),
-          ),
-      ]
-    }),
+    Object.entries(modules).map(([moduleRequest, assetFilesIndex]) => [
+      moduleRequest,
+      assetFilesIndex
+        .map((fileIndex) => allFilesMeta[fileIndex])
+        .filter(
+          ({ file, type }) =>
+            async.includes(file) || (type !== 'style' && type !== 'script'),
+        ),
+    ]),
   )
 
   return {

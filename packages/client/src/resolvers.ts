@@ -1,29 +1,26 @@
-import {
-  dedupeHead,
-  isArray,
-  isString,
-  resolveLocalePath,
-} from '@vuepress/shared'
-import type { Component } from 'vue'
+import { dedupeHead, isString, resolveLocalePath } from '@vuepress/shared'
 import { reactive } from 'vue'
+import { LANG_DEFAULT, LAYOUT_NAME_DEFAULT } from './constants.js'
 import type {
+  ClientConfig,
+  Layouts,
   PageData,
   PageFrontmatter,
   PageHead,
   PageHeadTitle,
   PageLang,
+  PageLayout,
   RouteLocale,
   SiteData,
   SiteLocaleData,
-} from './composables/index.js'
-import { pageDataEmpty, pagesData } from './composables/index.js'
-import { LAYOUT_NAME_DEFAULT, LAYOUT_NAME_NOT_FOUND } from './constants.js'
-import type { ClientConfig, Layouts } from './types/index.js'
+} from './types/index.js'
 
 /**
  * Resolver methods to get global computed
  *
  * Users can override corresponding method for advanced customization
+ *
+ * @experimental - This is an experimental API and may be changed in minor versions
  */
 export const resolvers = reactive({
   /**
@@ -35,23 +32,8 @@ export const resolvers = reactive({
         ...prev,
         ...item.layouts,
       }),
-      {} as Layouts,
-    ),
-
-  /**
-   * Resolve page data according to page key
-   */
-  resolvePageData: async (pageKey: string): Promise<PageData> => {
-    const pageDataResolver = pagesData.value[pageKey]
-    const pageData = await pageDataResolver?.()
-    return pageData ?? pageDataEmpty
-  },
-
-  /**
-   * Resolve page frontmatter from page data
-   */
-  resolvePageFrontmatter: (pageData: PageData): PageFrontmatter =>
-    pageData.frontmatter,
+      {},
+    ) as Layouts,
 
   /**
    * Merge the head config in frontmatter and site locale
@@ -59,17 +41,17 @@ export const resolvers = reactive({
    * Frontmatter should take priority over site locale
    */
   resolvePageHead: (
-    headTitle: PageHeadTitle,
-    frontmatter: PageFrontmatter,
-    siteLocale: SiteLocaleData,
+    pageHeadTitle: PageHeadTitle,
+    pageFrontmatter: PageFrontmatter,
+    siteLocaleDate: SiteLocaleData,
   ): PageHead => {
-    const description = isString(frontmatter.description)
-      ? frontmatter.description
-      : siteLocale.description
+    const description = isString(pageFrontmatter.description)
+      ? pageFrontmatter.description
+      : siteLocaleDate.description
     const head: PageHead = [
-      ...(isArray(frontmatter.head) ? frontmatter.head : []),
-      ...siteLocale.head,
-      ['title', {}, headTitle],
+      ...(Array.isArray(pageFrontmatter.head) ? pageFrontmatter.head : []),
+      ...siteLocaleDate.head,
+      ['title', {}, pageHeadTitle],
       ['meta', { name: 'description', content: description }],
     ]
     return dedupeHead(head)
@@ -81,41 +63,31 @@ export const resolvers = reactive({
    * It would be used as the content of the `<title>` tag
    */
   resolvePageHeadTitle: (
-    page: PageData,
-    siteLocale: SiteLocaleData,
+    pageData: PageData,
+    siteLocaleDate: SiteLocaleData,
   ): PageHeadTitle =>
-    [page.title, siteLocale.title].filter((item) => !!item).join(' | '),
+    [pageData.title, siteLocaleDate.title].filter((item) => !!item).join(' | '),
 
   /**
    * Resolve page language from page data
    *
    * It would be used as the `lang` attribute of `<html>` tag
    */
-  resolvePageLang: (page: PageData, siteLocale: SiteLocaleData): PageLang =>
-    page.lang || siteLocale.lang || 'en-US',
+  resolvePageLang: (
+    pageData: PageData,
+    siteLocaleData: SiteLocaleData,
+  ): PageLang => pageData.lang || siteLocaleData.lang || LANG_DEFAULT,
 
   /**
    * Resolve layout component of current page
    */
-  resolvePageLayout: (page: PageData, layouts: Layouts): Component => {
-    let layoutName: string
-
-    // if current page exists
-    if (page.path) {
-      // use layout from frontmatter
-      const frontmatterLayout = page.frontmatter.layout
-
-      if (isString(frontmatterLayout)) {
-        layoutName = frontmatterLayout
-      } else {
-        // fallback to default layout
-        layoutName = LAYOUT_NAME_DEFAULT
-      }
-    }
-    // if current page does not exist
-    else {
-      // use NotFound layout
-      layoutName = LAYOUT_NAME_NOT_FOUND
+  resolvePageLayout: (pageData: PageData, layouts: Layouts): PageLayout => {
+    const layoutName = isString(pageData.frontmatter.layout)
+      ? pageData.frontmatter.layout
+      : LAYOUT_NAME_DEFAULT
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- unsafe indexed access
+    if (!layouts[layoutName]) {
+      throw new Error(`[vuepress] Cannot resolve layout: ${layoutName}`)
     }
     return layouts[layoutName]
   },
@@ -126,7 +98,7 @@ export const resolvers = reactive({
   resolveRouteLocale: (
     locales: SiteData['locales'],
     routePath: string,
-  ): RouteLocale => resolveLocalePath(locales, routePath),
+  ): RouteLocale => resolveLocalePath(locales, decodeURI(routePath)),
 
   /**
    * Resolve site data for specific locale
@@ -134,10 +106,17 @@ export const resolvers = reactive({
    * It would merge the locales fields to the root fields
    */
   resolveSiteLocaleData: (
-    site: SiteData,
+    { base, locales, ...siteData }: SiteData,
     routeLocale: RouteLocale,
   ): SiteLocaleData => ({
-    ...site,
-    ...site.locales[routeLocale],
+    ...siteData,
+    ...locales[routeLocale],
+    head: [
+      // when merging head, the locales head should be placed before root head
+      // to get higher priority
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- unsafe indexed access
+      ...(locales[routeLocale]?.head ?? []),
+      ...siteData.head,
+    ],
   }),
 })

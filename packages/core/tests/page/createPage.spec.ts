@@ -1,18 +1,19 @@
 import { path } from '@vuepress/utils'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
+import type { Bundler } from '../../src/index.js'
 import { createBaseApp, createPage } from '../../src/index.js'
 
-const app = createBaseApp({
-  source: path.resolve(__dirname, 'fake-source'),
-  theme: { name: 'test' },
-  bundler: {} as any,
-})
+describe('should work without plugins', () => {
+  const app = createBaseApp({
+    source: path.resolve(__dirname, 'fake-source'),
+    theme: { name: 'test' },
+    bundler: {} as Bundler,
+  })
 
-beforeAll(async () => {
-  await app.init()
-})
+  beforeAll(async () => {
+    await app.init()
+  })
 
-describe('core > page > createPage', () => {
   it('should throw an error', async () => {
     const consoleError = console.error
     console.error = vi.fn()
@@ -29,7 +30,6 @@ describe('core > page > createPage', () => {
     })
 
     // page data
-    expect(page.data.key).toBeTruthy()
     expect(page.data.path).toBe('/')
     expect(page.data.lang).toBe('en-US')
     expect(page.data.title).toBe('')
@@ -37,7 +37,6 @@ describe('core > page > createPage', () => {
     expect(page.data.headers).toEqual([])
 
     // base fields
-    expect(page.key).toBeTruthy()
     expect(page.path).toBe('/')
     expect(page.lang).toBe('en-US')
     expect(page.title).toBe('')
@@ -80,21 +79,22 @@ describe('core > page > createPage', () => {
     expect(page.componentFilePathRelative).toBe(
       `pages/${page.htmlFilePathRelative}.vue`,
     )
-    expect(page.componentFileChunkName).toBe(page.key)
-    expect(page.dataFilePath).toBe(
+    expect(page.chunkFilePath).toBe(
       app.dir.temp(`pages/${page.htmlFilePathRelative}.js`),
     )
-    expect(page.dataFilePathRelative).toBe(
+    expect(page.chunkFilePathRelative).toBe(
       `pages/${page.htmlFilePathRelative}.js`,
     )
-    expect(page.dataFileChunkName).toBe(page.key)
+    expect(page.chunkName).toBeTruthy()
   })
+})
 
+describe('should work with plugins', () => {
   it('should be extended by plugin correctly', async () => {
     const app = createBaseApp({
       source: path.resolve(__dirname, 'fake-source'),
       theme: { name: 'test' },
-      bundler: {} as any,
+      bundler: {} as Bundler,
     })
     app.use({
       name: 'foo',

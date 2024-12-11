@@ -1,6 +1,6 @@
 {
   "name": "@vuepress/utils",
-  "version": "2.0.0-beta.67",
+  "version": "2.0.0-rc.19",
   "description": "Utils package of VuePress",
   "keywords": [
     "vuepress",
@@ -8,11 +8,11 @@
   ],
   "homepage": "https://github.com/vuepress",
   "bugs": {
-    "url": "https://github.com/vuepress/vuepress-next/issues"
+    "url": "https://github.com/vuepress/core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuepress/vuepress-next.git"
+    "url": "git+https://github.com/vuepress/core.git"
   },
   "license": "MIT",
   "author": "meteorlxy",
@@ -31,16 +31,16 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@types/debug": "^4.1.9",
-    "@types/fs-extra": "^11.0.2",
-    "@types/hash-sum": "^1.0.0",
+    "@types/debug": "^4.1.12",
+    "@types/fs-extra": "^11.0.4",
+    "@types/hash-sum": "^1.0.2",
     "@vuepress/shared": "workspace:*",
-    "debug": "^4.3.4",
-    "fs-extra": "^11.1.1",
-    "globby": "^13.2.2",
+    "debug": "^4.4.0",
+    "fs-extra": "^11.2.0",
+    "globby": "^14.0.2",
     "hash-sum": "^2.0.0",
-    "ora": "^7.0.1",
-    "picocolors": "^1.0.0",
+    "ora": "^8.1.1",
+    "picocolors": "^1.1.1",
     "upath": "^2.0.1"
   },
   "publishConfig": {
@@ -58,6 +58,6 @@
     "outDir": "./dist",
     "sourcemap": false,
     "target": "es2022",
-    "tsconfig": "../tsconfig.dts.json"
+    "tsconfig": "../../tsconfig.dts.json"
   }
 }

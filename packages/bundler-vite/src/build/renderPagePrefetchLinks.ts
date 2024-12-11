@@ -14,7 +14,7 @@ export const renderPagePrefetchLinks = ({
   pageChunkFiles: string[]
 }): string => {
   // shouldPrefetch option
-  const shouldPrefetch = app.options.shouldPrefetch
+  const { shouldPrefetch } = app.options
 
   // do not render prefetch links
   if (shouldPrefetch === false) {
@@ -32,8 +32,8 @@ export const renderPagePrefetchLinks = ({
       const type = item.endsWith('.js')
         ? 'script'
         : item.endsWith('.css')
-        ? 'style'
-        : ''
+          ? 'style'
+          : ''
 
       // user wants to explicitly control what to prefetch
       if (shouldPrefetch !== true && !shouldPrefetch(item, type)) {

@@ -1,6 +1,5 @@
 import { createRequire } from 'node:module'
-import type { App } from '@vuepress/core'
-import type Config from 'webpack-chain'
+import type Config from 'webpack-5-chain'
 import { resolveEsbuildJsxOptions } from './resolveEsbuildJsxOptions.js'
 
 const require = createRequire(import.meta.url)
@@ -8,13 +7,7 @@ const require = createRequire(import.meta.url)
 /**
  * Set webpack module to handle ts files
  */
-export const handleModuleTs = ({
-  app,
-  config,
-}: {
-  app: App
-  config: Config
-}): void => {
+export const handleModuleTs = ({ config }: { config: Config }): void => {
   config.module
     .rule('ts')
     .test(/\.tsx?/)

@@ -6,8 +6,8 @@ import { colors, isChildPath, logger } from '@vuepress/utils'
  * Resolve app config according to:
  *
  * - default options
- * - cli options
  * - user config file
+ * - cli options
  */
 export const resolveAppConfig = ({
   defaultAppConfig,
@@ -20,18 +20,21 @@ export const resolveAppConfig = ({
 }): AppConfig | null => {
   const appConfig = {
     // allow setting default app config via `cli()`
-    // for example, set different default bundler in `vuepress` and `vuepress-vite` package
     ...defaultAppConfig,
-    // use cli options to override config file
+    // user config from config file
     ...userConfig,
+    // allow cli options to override config file
     ...cliAppConfig,
-  } as AppConfig
+  }
+
+  if (appConfig.source === undefined) {
+    logger.error(`The ${colors.magenta('source')} option is missing.`)
+    return null
+  }
 
   if (appConfig.bundler === undefined || appConfig.theme === undefined) {
     logger.error(
-      `${colors.magenta('bundler')} and ${colors.magenta(
-        'theme',
-      )} are required`,
+      `The ${colors.magenta('bundler')} or ${colors.magenta('theme')} option is missing. For more details: ${colors.green('https://vuepress.vuejs.org/guide/troubleshooting.html#the-bundler-theme-option-is-missing')}`,
     )
     return null
   }
@@ -59,5 +62,5 @@ export const resolveAppConfig = ({
     delete appConfig.dest
   }
 
-  return appConfig
+  return appConfig as AppConfig
 }

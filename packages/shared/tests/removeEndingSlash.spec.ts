@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { removeEndingSlash } from '../src/index.js'
 
-const testCases = [
+const TEST_CASES = [
   ['foo/bar', 'foo/bar'],
   ['foo/bar/', 'foo/bar'],
   ['/foo/bar', '/foo/bar'],
@@ -10,12 +10,8 @@ const testCases = [
   ['/foo/bar.html', '/foo/bar.html'],
 ]
 
-describe('shared > removeEndingSlash', () => {
-  describe('should remove ending slash', () => {
-    testCases.forEach(([source, expected]) => {
-      it(source, () => {
-        expect(removeEndingSlash(source)).toBe(expected)
-      })
-    })
+TEST_CASES.forEach(([source, expected]) => {
+  it(source, () => {
+    expect(removeEndingSlash(source)).toBe(expected)
   })
 })

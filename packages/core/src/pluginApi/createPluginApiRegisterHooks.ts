@@ -2,6 +2,11 @@ import type { PluginApi } from '../types/index.js'
 import { normalizeAliasDefineHook } from './normalizeAliasDefineHook.js'
 import { normalizeClientConfigFileHook } from './normalizeClientConfigFileHook.js'
 
+/**
+ * Create registerHooks method for plugin api
+ *
+ * @internal
+ */
 export const createPluginApiRegisterHooks =
   (
     plugins: PluginApi['plugins'],
@@ -48,9 +53,10 @@ export const createPluginApiRegisterHooks =
          */
         Object.keys(commonHooks).forEach((key) => {
           if (hooks[key] && commonHooks[key]) {
-            hooks[key].add({
+            hooks[key as keyof typeof hooks].add({
               pluginName,
-              hook: commonHooks[key],
+              // @ts-expect-error: the type could not be narrowed correctly
+              hook: commonHooks[key as keyof typeof commonHooks],
             })
           }
         })

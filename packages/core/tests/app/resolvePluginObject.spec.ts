@@ -1,33 +1,31 @@
 import { path } from '@vuepress/utils'
-import { describe, expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'vitest'
+import type { Bundler, PluginFunction, PluginObject } from '../../src/index.js'
 import { createBaseApp, resolvePluginObject } from '../../src/index.js'
-import type { PluginFunction, PluginObject } from '../../src/index.js'
 
 const app = createBaseApp({
   source: path.resolve(__dirname, 'fake-source'),
   theme: { name: 'test' },
-  bundler: {} as any,
+  bundler: {} as Bundler,
 })
 
-describe('core > app > resolvePluginObject', () => {
-  it('should work with plugin object', () => {
-    const pluginObject: PluginObject = {
-      name: 'plugin-object',
-    }
+it('should work with plugin object', () => {
+  const pluginObject: PluginObject = {
+    name: 'plugin-object',
+  }
 
-    const result = resolvePluginObject(app, pluginObject)
-    expect(result.name).toEqual('plugin-object')
-  })
+  const result = resolvePluginObject(app, pluginObject)
+  expect(result.name).toEqual('plugin-object')
+})
 
-  it('should work with plugin function', () => {
-    const pluginFunction: PluginFunction = vi.fn((app) => ({
-      name: 'plugin-function',
-    }))
+it('should work with plugin function', () => {
+  const pluginFunction: PluginFunction = vi.fn(() => ({
+    name: 'plugin-function',
+  }))
 
-    const result = resolvePluginObject(app, pluginFunction)
+  const result = resolvePluginObject(app, pluginFunction)
 
-    expect(pluginFunction).toHaveBeenCalledTimes(1)
-    expect(pluginFunction).toHaveBeenCalledWith(app)
-    expect(result.name).toEqual('plugin-function')
-  })
+  expect(pluginFunction).toHaveBeenCalledTimes(1)
+  expect(pluginFunction).toHaveBeenCalledWith(app)
+  expect(result.name).toEqual('plugin-function')
 })

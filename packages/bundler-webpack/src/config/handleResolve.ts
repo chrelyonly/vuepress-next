@@ -1,5 +1,5 @@
 import type { App } from '@vuepress/core'
-import type Config from 'webpack-chain'
+import type Config from 'webpack-5-chain'
 
 /**
  * Set webpack resolve
@@ -44,9 +44,9 @@ export const handleResolve = async ({
   const aliasResult = await app.pluginApi.hooks.alias.process(app, isServer)
 
   // set aliases
-  aliasResult.forEach((aliasObject) =>
+  aliasResult.forEach((aliasObject) => {
     Object.entries(aliasObject).forEach(([key, value]) => {
-      config.resolve.alias.set(key, value)
-    }),
-  )
+      config.resolve.alias.set(key, value as string)
+    })
+  })
 }

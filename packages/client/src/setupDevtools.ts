@@ -1,7 +1,7 @@
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
-import { watch } from 'vue'
 import type { App } from 'vue'
-import type { GlobalComputed } from './setupGlobalComputed.js'
+import { watch } from 'vue'
+import type { ClientData } from './types/index.js'
 
 const PLUGIN_ID = 'org.vuejs.vuepress'
 const PLUGIN_LABEL = 'VuePress'
@@ -9,33 +9,36 @@ const PLUGIN_COMPONENT_STATE_TYPE = PLUGIN_LABEL
 
 const INSPECTOR_ID = PLUGIN_ID
 const INSPECTOR_LABEL = PLUGIN_LABEL
-const INSPECTOR_GLOBAL_COMPUTED_ID = 'global-computed'
-const INSPECTOR_GLOBAL_COMPUTED_LABEL = 'Global Computed'
+const INSPECTOR_CLIENT_DATA_ID = 'client-data'
+const INSPECTOR_CLIENT_DATA_LABEL = 'Client Data'
 
-export const setupDevtools = (
-  app: App,
-  globalComputed: GlobalComputed,
-): void => {
+type ClientDataKey = keyof ClientData
+type ClientDataValue = ClientData[ClientDataKey]
+
+export const setupDevtools = (app: App, clientData: ClientData): void => {
   setupDevtoolsPlugin(
     {
       // fix recursive reference
-      app: app as any,
+      app: app as never,
       id: PLUGIN_ID,
       label: PLUGIN_LABEL,
       packageName: '@vuepress/client',
-      homepage: 'https://v2.vuepress.vuejs.org',
-      logo: 'https://v2.vuepress.vuejs.org/images/hero.png',
+      homepage: 'https://vuepress.vuejs.org',
+      logo: 'https://vuepress.vuejs.org/images/hero.png',
       componentStateTypes: [PLUGIN_COMPONENT_STATE_TYPE],
     },
     (api) => {
-      const globalComputedEntries = Object.entries(globalComputed)
-      const globalComputedKeys = Object.keys(globalComputed)
-      const globalComputedValues = Object.values(globalComputed)
+      const clientDataEntries = Object.entries(clientData) as [
+        ClientDataKey,
+        ClientDataValue,
+      ][]
+      const clientDataKeys = Object.keys(clientData) as ClientDataKey[]
+      const clientDataValues = Object.values(clientData) as ClientDataValue[]
 
       // setup component state
       api.on.inspectComponent((payload) => {
         payload.instanceData.state.push(
-          ...globalComputedEntries.map(([name, item]) => ({
+          ...clientDataEntries.map(([name, item]) => ({
             type: PLUGIN_COMPONENT_STATE_TYPE,
             editable: false,
             key: name,
@@ -54,9 +57,9 @@ export const setupDevtools = (
         if (payload.inspectorId !== INSPECTOR_ID) return
         payload.rootNodes = [
           {
-            id: INSPECTOR_GLOBAL_COMPUTED_ID,
-            label: INSPECTOR_GLOBAL_COMPUTED_LABEL,
-            children: globalComputedKeys.map((name) => ({
+            id: INSPECTOR_CLIENT_DATA_ID,
+            label: INSPECTOR_CLIENT_DATA_LABEL,
+            children: clientDataKeys.map((name) => ({
               id: name,
               label: name,
             })),
@@ -65,9 +68,9 @@ export const setupDevtools = (
       })
       api.on.getInspectorState((payload) => {
         if (payload.inspectorId !== INSPECTOR_ID) return
-        if (payload.nodeId === INSPECTOR_GLOBAL_COMPUTED_ID) {
+        if (payload.nodeId === INSPECTOR_CLIENT_DATA_ID) {
           payload.state = {
-            [INSPECTOR_GLOBAL_COMPUTED_LABEL]: globalComputedEntries.map(
+            [INSPECTOR_CLIENT_DATA_LABEL]: clientDataEntries.map(
               ([name, item]) => ({
                 key: name,
                 value: item.value,
@@ -75,12 +78,12 @@ export const setupDevtools = (
             ),
           }
         }
-        if (globalComputedKeys.includes(payload.nodeId)) {
+        if (clientDataKeys.includes(payload.nodeId as ClientDataKey)) {
           payload.state = {
-            [INSPECTOR_GLOBAL_COMPUTED_LABEL]: [
+            [INSPECTOR_CLIENT_DATA_LABEL]: [
               {
                 key: payload.nodeId,
-                value: globalComputed[payload.nodeId].value,
+                value: clientData[payload.nodeId as ClientDataKey].value,
               },
             ],
           }
@@ -88,7 +91,7 @@ export const setupDevtools = (
       })
 
       // refresh the component state and inspector state
-      watch(globalComputedValues, () => {
+      watch(clientDataValues, () => {
         api.notifyComponentUpdate()
         api.sendInspectorState(INSPECTOR_ID)
       })

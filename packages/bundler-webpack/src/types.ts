@@ -1,8 +1,11 @@
+import type { BundlerOptions } from '@vuepress/core'
 import type { VueLoaderOptions } from 'vue-loader'
-import type { Configuration as WebpackConfiguration } from 'webpack'
-import type WebpackChainConfig from 'webpack-chain'
+import type {
+  LoaderContext,
+  Configuration as WebpackConfiguration,
+} from 'webpack'
+import type WebpackChainConfig from 'webpack-5-chain'
 import type WebpackDevServer from 'webpack-dev-server'
-import type { LoaderContext } from './types.webpack.js'
 
 export type {
   VueLoaderOptions,
@@ -14,7 +17,7 @@ export type {
 /**
  * Options for bundler-webpack
  */
-export interface WebpackBundlerOptions {
+export interface WebpackBundlerOptions extends BundlerOptions {
   /**
    * use webpack-merge to set webpack config
    */
@@ -25,7 +28,7 @@ export interface WebpackBundlerOptions {
   ) => WebpackConfiguration | void
 
   /**
-   * use webpack-chain to set webpack config
+   * use webpack-5-chain to set webpack config
    */
   chainWebpack?: (
     config: WebpackChainConfig,
@@ -75,32 +78,36 @@ export interface WebpackBundlerOptions {
 }
 
 /**
- * Common options for some webpack loaders
+ * Common options for style preprocessor webpack loaders
  */
-export interface LoaderOptions {
-  sourceMap?: boolean
-  webpackImporter?: boolean
+export interface StylePreprocessorLoaderOptions {
   additionalData?:
     | string
-    | ((content: string, loaderContext: LoaderContext) => string)
+    | ((
+        content: string,
+        loaderContext: LoaderContext<Record<string, unknown>>,
+      ) => string)
+  sourceMap?: boolean
+  webpackImporter?: boolean
 }
 
 /**
  * Common type for style pre-processor options
  */
 export type StylePreprocessorOptions<
-  T extends Record<string, any> = Record<string, any>,
-> = T | ((loaderContext: LoaderContext) => TextDecodeOptions)
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = T | ((loaderContext: LoaderContext<T>) => TextDecodeOptions)
 
 /**
  * Options for postcss-loader
  *
  * @see https://github.com/webpack-contrib/postcss-loader#options
  */
-export interface PostcssLoaderOptions extends Pick<LoaderOptions, 'sourceMap'> {
+export interface PostcssLoaderOptions
+  extends Pick<StylePreprocessorLoaderOptions, 'sourceMap'> {
   execute?: boolean
+  implementation?: string | ((...args: unknown[]) => unknown)
   postcssOptions?: StylePreprocessorOptions
-  implementation?: ((...args: any) => any) | string
 }
 
 /**
@@ -108,7 +115,8 @@ export interface PostcssLoaderOptions extends Pick<LoaderOptions, 'sourceMap'> {
  *
  * @see https://github.com/webpack-contrib/stylus-loader#options
  */
-export interface StylusLoaderOptions extends LoaderOptions {
+export interface StylusLoaderOptions extends StylePreprocessorLoaderOptions {
+  implementation?: string | ((...args: unknown[]) => unknown)
   stylusOptions?: StylePreprocessorOptions
 }
 
@@ -117,9 +125,11 @@ export interface StylusLoaderOptions extends LoaderOptions {
  *
  * @see https://github.com/webpack-contrib/sass-loader#options
  */
-export interface SassLoaderOptions extends LoaderOptions {
-  implementation?: Record<string, any> | string
+export interface SassLoaderOptions extends StylePreprocessorLoaderOptions {
+  api?: 'legacy' | 'modern-compiler' | 'modern'
+  implementation?: Record<string, unknown> | string
   sassOptions?: StylePreprocessorOptions
+  warnRuleAsWarning?: boolean
 }
 
 /**
@@ -127,6 +137,8 @@ export interface SassLoaderOptions extends LoaderOptions {
  *
  * @see https://github.com/webpack-contrib/less-loader#options
  */
-export interface LessLoaderOptions extends LoaderOptions {
+export interface LessLoaderOptions extends StylePreprocessorLoaderOptions {
+  implementation?: Record<string, unknown> | string
+  lessLogAsWarnOrErr?: boolean
   lessOptions?: StylePreprocessorOptions
 }

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { ensureEndingSlash } from '../src/index.js'
 
-const testCases = [
+const TEST_CASES = [
   ['foo/bar', 'foo/bar/'],
   ['foo/bar/', 'foo/bar/'],
   ['/foo/bar', '/foo/bar/'],
@@ -10,12 +10,8 @@ const testCases = [
   ['/foo/bar.html', '/foo/bar.html'],
 ]
 
-describe('shared > ensureEndingSlash', () => {
-  describe('should ensure ending slash for urls', () => {
-    testCases.forEach(([source, expected]) => {
-      it(source, () => {
-        expect(ensureEndingSlash(source)).toBe(expected)
-      })
-    })
+TEST_CASES.forEach(([source, expected]) => {
+  it(source, () => {
+    expect(ensureEndingSlash(source)).toBe(expected)
   })
 })

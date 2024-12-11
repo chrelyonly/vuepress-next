@@ -2,7 +2,7 @@ import { path } from '@vuepress/utils'
 import { describe, expect, it } from 'vitest'
 import { loadUserConfig } from '../../src/index.js'
 
-const tsCases: [string, any][] = [
+const TS_CASES: [string, unknown][] = [
   [
     path.resolve(__dirname, '../__fixtures__/config/ts/.vuepress/config.ts'),
     {
@@ -17,7 +17,7 @@ const tsCases: [string, any][] = [
   ],
 ]
 
-const jsCases: [string, any][] = [
+const JS_CASES: [string, unknown][] = [
   [
     path.resolve(__dirname, '../__fixtures__/config/js/.vuepress/config.js'),
     {
@@ -32,7 +32,7 @@ const jsCases: [string, any][] = [
   ],
 ]
 
-const mjsCases: [string, any][] = [
+const MJS_CASES: [string, unknown][] = [
   [
     path.resolve(__dirname, '../__fixtures__/config/mjs/.vuepress/config.mjs'),
     {
@@ -47,31 +47,29 @@ const mjsCases: [string, any][] = [
   ],
 ]
 
-describe('cli > config > loadUserConfig', () => {
-  describe('should load ts config file correctly', () => {
-    tsCases.forEach(([source, expected]) => {
-      it(JSON.stringify(source), async () => {
-        const { userConfig } = await loadUserConfig(source)
-        expect(userConfig).toEqual(expected)
-      })
+describe('should load ts config file correctly', () => {
+  TS_CASES.forEach(([source, expected]) => {
+    it(JSON.stringify(source), async () => {
+      const { userConfig } = await loadUserConfig(source)
+      expect(userConfig).toEqual(expected)
     })
   })
+})
 
-  describe('should load js config file correctly', () => {
-    jsCases.forEach(([source, expected]) => {
-      it(JSON.stringify(source), async () => {
-        const { userConfig } = await loadUserConfig(source)
-        expect(userConfig).toEqual(expected)
-      })
+describe('should load js config file correctly', () => {
+  JS_CASES.forEach(([source, expected]) => {
+    it(JSON.stringify(source), async () => {
+      const { userConfig } = await loadUserConfig(source)
+      expect(userConfig).toEqual(expected)
     })
   })
+})
 
-  describe('should load mjs config file correctly', () => {
-    mjsCases.forEach(([source, expected]) => {
-      it(JSON.stringify(source), async () => {
-        const { userConfig } = await loadUserConfig(source)
-        expect(userConfig).toEqual(expected)
-      })
+describe('should load mjs config file correctly', () => {
+  MJS_CASES.forEach(([source, expected]) => {
+    it(JSON.stringify(source), async () => {
+      const { userConfig } = await loadUserConfig(source)
+      expect(userConfig).toEqual(expected)
     })
   })
 })

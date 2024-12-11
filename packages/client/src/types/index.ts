@@ -1,4 +1,4 @@
-export * from './clientConfig.js'
-export * from './createVueAppFunction.js'
-export * from './layouts.js'
-export * from './pageRouteItem.js'
+export type * from './clientConfig.js'
+export type * from './clientData.js'
+export type * from './createVueAppFunction.js'
+export type * from './routes.js'

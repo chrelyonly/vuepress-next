@@ -10,6 +10,8 @@ const DEFAULT_DATE = '0000-00-00'
  * Resolve page date according to frontmatter or file path
  *
  * It will be resolved as 'yyyy-MM-dd' format
+ *
+ * @internal
  */
 export const resolvePageDate = ({
   frontmatter,
@@ -44,6 +46,7 @@ export const resolvePageDate = ({
     const matches = filename.match(FILENAME_DATE_RE)
     if (matches) {
       return formatDateString(
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- unsafe indexed access
         `${matches[1]}-${matches[2]}-${matches[3] ?? '01'}`,
         DEFAULT_DATE,
       )
@@ -56,6 +59,7 @@ export const resolvePageDate = ({
     const matches = dirname.match(DIRNAME_DATE_RE)
     if (matches) {
       return formatDateString(
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- unsafe indexed access
         `${matches[1]}-${matches[2]}-${matches[3] ?? '01'}`,
         DEFAULT_DATE,
       )

@@ -2,10 +2,10 @@ import type { MarkdownSfcBlocks } from '@mdit-vue/plugin-sfc'
 import type { MarkdownItEnv } from '@mdit-vue/types'
 import type { PageFrontmatter, PageHeader } from '@vuepress/shared'
 import type MarkdownIt from 'markdown-it'
+import type { Options } from 'markdown-it'
 import type {
   AnchorPluginOptions,
   AssetsPluginOptions,
-  CodePluginOptions,
   EmojiPluginOptions,
   FrontmatterPluginOptions,
   HeadersPluginOptions,
@@ -13,25 +13,30 @@ import type {
   LinksPluginOptions,
   SfcPluginOptions,
   TocPluginOptions,
+  VPrePluginOptions,
 } from './plugins.js'
 
 export type Markdown = MarkdownIt
 export type { MarkdownSfcBlocks }
 
-export interface MarkdownOptions extends MarkdownIt.Options {
-  anchor?: false | AnchorPluginOptions
-  assets?: false | AssetsPluginOptions
-  code?: false | CodePluginOptions
+export interface MarkdownOptions extends Options {
+  anchor?: AnchorPluginOptions | false
+  assets?: AssetsPluginOptions | false
   component?: false
-  emoji?: false | EmojiPluginOptions
-  frontmatter?: false | FrontmatterPluginOptions
-  headers?: false | HeadersPluginOptions
+  emoji?: EmojiPluginOptions | false
+  frontmatter?: FrontmatterPluginOptions | false
+  headers?: HeadersPluginOptions | false
   title?: false
-  importCode?: false | ImportCodePluginOptions
-  links?: false | LinksPluginOptions
-  sfc?: false | SfcPluginOptions
+  importCode?: ImportCodePluginOptions | false
+  links?: LinksPluginOptions | false
+  sfc?: SfcPluginOptions | false
   slugify?: MarkdownSlugifyFunction
-  toc?: false | TocPluginOptions
+  toc?: TocPluginOptions | false
+  vPre?: VPrePluginOptions | false
+  /**
+   * @deprecated This feature has been removed. Please use `@vuepress/plugin-prismjs` or `@vuepress/plugin-shiki` instead.
+   */
+  code?: never
 }
 
 /**
@@ -47,7 +52,7 @@ export type MarkdownHeader = PageHeader
 export interface MarkdownLink {
   raw: string
   relative: string
-  absolute: string
+  absolute: string | null
 }
 
 /**
